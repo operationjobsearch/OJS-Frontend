@@ -1,7 +1,6 @@
 import {
   GameObject,
   PlayerObject,
-  Player,
   CameraController,
   DebugPanel,
   World,

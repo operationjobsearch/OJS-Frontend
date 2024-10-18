@@ -1,30 +1,33 @@
-import { Controls } from "../App";
 import { Player, GameProps } from "..";
-import { Suspense, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { Suspense, useEffect, useRef } from "react";
 import { Physics, RapierRigidBody, RigidBody } from "@react-three/rapier";
 import { Box, useKeyboardControls } from "@react-three/drei";
 
 export const World = (gameProps: GameProps) => {
   const player = useRef<RapierRigidBody>(null);
-  //   const
+  const isOnFloor = useRef(true);
+
   const jump = () => {
     if (player.current && isOnFloor.current) {
       player.current.applyImpulse({ x: 0, y: 5, z: 0 }, true);
       isOnFloor.current = false;
-      console.log("impulse applied");
     }
   };
 
-  const jumpPressed = useKeyboardControls((state) => state[Controls.jump]);
-  useFrame(() => {
-    if (jumpPressed) {
-      console.log(isOnFloor);
-      jump();
-    }
-  });
+  const [spacePressed] = useKeyboardControls();
 
-  const isOnFloor = useRef(true);
+  useEffect(() => {
+    spacePressed(
+      (state) => {
+        console.log("state.jump:", state.jump);
+        return state.jump;
+      },
+      (value) => {
+        console.log("value:", value);
+        if (value) jump();
+      }
+    );
+  }, []);
 
   return (
     <Suspense>
@@ -38,7 +41,6 @@ export const World = (gameProps: GameProps) => {
               other.rigidBodyObject.name === "floor"
             ) {
               isOnFloor.current = true;
-              console.log("on collision enter!!!!!!!!!!");
             }
           }}
           onCollisionExit={({ other }) => {
@@ -47,7 +49,6 @@ export const World = (gameProps: GameProps) => {
               other.rigidBodyObject.name === "floor"
             ) {
               isOnFloor.current = false;
-              console.log("on collision exit!!!!!!!!!!");
             }
           }}
         >
